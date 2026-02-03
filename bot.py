@@ -166,6 +166,16 @@ class Bot(commands.Bot):
                 target_name = match.group(1).strip()
                 await self.move_user(user, target_name)
 
+        elif "silence" in full_text:
+            if user.voice:
+                await user.edit(deafen=True)
+                print(f"Deafened {user.name}")
+
+        elif "listen" in full_text:
+            if user.voice:
+                await user.edit(deafen=False)
+                print(f"Undeafened {user.name}")
+
     """
     Finds the closest matching channel name using fuzzy matching and moves the user.
     """
