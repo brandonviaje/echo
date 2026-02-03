@@ -136,9 +136,18 @@ class Bot(commands.Bot):
     Parses text for commands like 'Hey Echo', 'Move me', 'Disconnect'.
     """
     async def process_command(self, user, full_text):
-        # check for wake word
+        # check for wake word, play audio feedback to indicate bot is listening
         if "hey echo" in full_text or "echo" in full_text:
             self.last_wake_time[user.id] = time.time()
+
+            vc = user.guild.voice_client   
+            # play audio feedback if connected and not already playing something else
+            if vc and vc.is_connected() and not vc.is_playing():
+                try:
+                    source = discord.FFmpegPCMAudio("noti_sound.mp3")
+                    vc.play(source)
+                except Exception as e:
+                    print(f"Could not play sound: {e}")
 
         # check if user said wake word recently
         is_awake = (user.id in self.last_wake_time and time.time() - self.last_wake_time[user.id] < self.WAKE_WINDOW)
