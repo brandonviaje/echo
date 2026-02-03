@@ -7,7 +7,6 @@ import logging
 import os
 from discord.ext.voice_recv import BasicSink
 import discord.opus
-import warnings
 
 _original_opus_decode = discord.opus.Decoder.decode
 
@@ -25,11 +24,10 @@ def on_speech_wrapper(recognizer, audio, user):
     bot.loop.create_task(bot.on_speech(recognizer, audio, user))
 
 if __name__ == "__main__":
-    # load env variables, model, logger, ignore warning
+    # load env variables, model, logger
     load_dotenv() 
     whisper_model = WhisperModel("base.en", device="cpu", download_root="./models", compute_type="int8")
     logging.getLogger("discord.ext.voice_recv.reader").setLevel(logging.ERROR)
-    warnings.filterwarnings("ignore", category=UserWarning, module='webrtcvad')
 
     # init bot and guild ID 
     bot = Bot(whisper_model)
@@ -50,5 +48,14 @@ if __name__ == "__main__":
             await interaction.followup.send("I am now listening to you!")
         else:
             await interaction.response.send_message("You need to be in a VC first!", ephemeral=True)
+
+    @bot.tree.command(name="leave", description="Make me leave the VC", guild=GUILD_ID)
+    async def leave(interaction: discord.Interaction):
+        if bot.voice_clients:
+            for vc in bot.voice_clients:
+                await vc.disconnect()
+            await interaction.response.send_message("I left the voice channel!")
+        else:
+            await interaction.response.send_message("I'm not in a voice channel!", ephemeral=True)
 
     bot.run(os.getenv('DISCORD_TOKEN')) # run bot
