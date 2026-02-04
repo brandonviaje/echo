@@ -161,7 +161,7 @@ class Bot(commands.Bot):
                 await user.move_to(None)
 
         elif "move" in full_text and "to" in full_text:
-            match = re.search(r"to\s+(.+)", full_text)
+            match = re.search(r"to\s+(.+)", full_text) # parse channel name
             if match:
                 target_name = match.group(1).strip()
                 await self.move_user(user, target_name)
@@ -175,6 +175,39 @@ class Bot(commands.Bot):
             if user.voice:
                 await user.edit(deafen=False)
                 print(f"Undeafened {user.name}")
+
+        elif "drag" in full_text:
+            match = re.search(r"(?:drag)\s+(.+?)\s+to\s+(.+)", full_text)  # parse username and channel name
+            
+            if match:
+                target_person_name = match.group(1).strip()
+                target_channel_name = match.group(2).strip()
+                
+                # find user
+
+                # get all voice members in server
+                voice_members = []
+                for channel in user.guild.voice_channels:
+                    voice_members.extend(channel.members)
+                
+                # create map of names and nicknames
+                member_map = {m.name: m for m in voice_members}
+                for m in voice_members:
+                    if m.nick: 
+                        member_map[m.nick] = m
+                
+                # fuzzy match person's name
+                best_person_match = process.extractOne(target_person_name, list(member_map.keys()))
+                
+                if best_person_match:
+                    found_name, score = best_person_match
+                    # if found name score >= 60% use that
+                    if score >= 60: 
+                        target_user = member_map[found_name]
+                        print(f"Found user: {found_name} ({score}%)")
+                        await self.move_user(target_user, target_channel_name) # move user
+                    else:
+                        print(f"Could not find user '{target_person_name}'")
 
     """
     Finds the closest matching channel name using fuzzy matching and moves the user.
