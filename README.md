@@ -48,7 +48,8 @@ python3 main.py
 
 ## Planned / Upcoming Commands
 
-- **Volume Control:** Command to Mute/unmute specific users.  
+- **Volume Control:** Command to Mute/unmute specific users.
+- **Manage Chat:** Command to delete messages.  
 - **Timers / Reminders:** Set a timer or remind users in VC.  
 - **Music Control:** Play/pause/skip music in voice channels.  
 
